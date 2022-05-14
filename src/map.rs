@@ -51,7 +51,7 @@ pub fn graph(areas: &str, locations: &str) -> Result<Graph, JsValue> {
     let logic = wotw_seedgen::logic::parse_logic(areas, locations, states, &settings, false)?;
 
     let positioned_nodes = logic.nodes.iter()
-        .filter_map(|node| node.position().map(|position| (node, position)))
+        .filter_map(|node| node.map_position().map(|position| (node, position)))
         .collect::<Vec<_>>();
 
     let nodes = nodes(&positioned_nodes);
@@ -131,7 +131,7 @@ pub struct Node {
     #[wasm_bindgen(getter_with_clone)]
     /// The name of this `Node`
     pub name: String,
-    /// The position of this `Node`, using in-game coordinates
+    /// The map position of this `Node`, using in-game coordinates
     pub position: Vector2,
 }
 
