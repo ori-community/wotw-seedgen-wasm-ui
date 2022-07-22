@@ -10,14 +10,13 @@ use wasm_bindgen_helper_macros::*;
 ts_enum! {
     #[wasm_bindgen]
     #[derive(Clone, Copy)]
-    #[doc = " A general distinction about the `Connection`"]
+    /// A general distinction about the `Connection`
     pub enum ConnectionType {
         /// Anchor-to-anchor `Connection`
         Branch,
         /// Anchor-to-pickup `Connection`
         Leaf,
     }
-    mod connection_type { typescript_type = "ConnectionType" }
 }
 
 #[wasm_bindgen]
@@ -29,11 +28,11 @@ pub struct Graph {
 #[wasm_bindgen]
 impl Graph {
     #[wasm_bindgen(getter)]
-    pub fn connections(&self) -> connection_list::ReturnArray {
+    pub fn connections(&self) -> ConnectionArray {
         self.connections.clone().into_js_array()
     }
     #[wasm_bindgen(getter)]
-    pub fn nodes(&self) -> node_list::ReturnObject {
+    pub fn nodes(&self) -> NodeObject {
         self.nodes.clone().into_js_object("name")
     }
 }
@@ -121,7 +120,6 @@ wrapper_map! {
     pub struct __NodeList {
         inner: IntoIter<Node>,
     }
-    mod node_list { typescript_type = "NodeMap" }
 }
 
 #[wasm_bindgen]
@@ -141,7 +139,6 @@ wrapper_list! {
     pub struct __ConnectionList {
         inner: IntoIter<Connection>,
     }
-    mod connection_list { typescript_type = "Connection[]" }
 }
 
 #[wasm_bindgen]
@@ -162,7 +159,7 @@ pub struct Connection {
 impl Connection {
     #[wasm_bindgen(getter, js_name = "type")]
     /// The `ConnectionType` of this `Connection`
-    pub fn kind(&self) -> connection_type::ReturnEnum {
+    pub fn kind(&self) -> ConnectionTypeEnum {
         self.kind.into_js_enum()
     }
 }
