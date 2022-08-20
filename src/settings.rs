@@ -1,7 +1,7 @@
 
 use wasm_bindgen::prelude::*;
 
-use wotw_seedgen::settings::Settings as SeedgenSettings;
+use wotw_seedgen::settings::GameSettings as SeedgenGameSettings;
 use wotw_seedgen::preset::GamePreset as SeedgenGamePreset;
 use wotw_seedgen::settings::WorldSettings as SeedgenWorldSettings;
 use wotw_seedgen::preset::WorldPreset as SeedgenWorldPreset;
@@ -12,21 +12,21 @@ use crate::files::JsFileAccess;
 /// 
 /// Using the same settings will result in generating the same seed (unless the used header files change)
 #[wasm_bindgen]
-pub struct Settings(SeedgenSettings);
+pub struct GameSettings(SeedgenGameSettings);
 #[wasm_bindgen]
-impl Settings {
-    /// Returns the default `Settings`
+impl GameSettings {
+    /// Returns the default `GameSettings`
     /// 
     /// When using this function, the string used to seed the rng will be randomly generated
-    pub fn default() -> Self { Self(SeedgenSettings::default()) }
+    pub fn default() -> Self { Self(SeedgenGameSettings::default()) }
 
-    /// Parse the `Settings` from json
+    /// Parse the `GameSettings` from json
     /// 
     /// @throws {string} if the input fails to deserialize
     #[wasm_bindgen(js_name = "fromJson")]
-    pub fn from_json(json: &str) -> Result<Settings, String> {
-        SeedgenSettings::parse(json)
-            .map(Settings)
+    pub fn from_json(json: &str) -> Result<GameSettings, String> {
+        SeedgenGameSettings::parse(json)
+            .map(GameSettings)
             .map_err(|err| err.to_string())
     }
     /// Serialize the `Settings` into json
@@ -96,7 +96,7 @@ impl WorldSettings {
 
 /// A collection of settings that can be applied to existing settings
 /// 
-/// Use `Settings.apply_preset` to apply a `GamePreset` to existing `Settings`
+/// Use `GameSettings.apply_preset` to apply a `GamePreset` to existing `GameSettings`
 #[wasm_bindgen]
 pub struct GamePreset(SeedgenGamePreset);
 #[wasm_bindgen]
