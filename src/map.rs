@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-use wotw_seedgen::settings::{GameSettings, Difficulty};
+use wotw_seedgen::settings::{UniverseSettings, Difficulty};
 use wotw_seedgen::world::graph::Node as SeedgenNode;
 use wotw_seedgen::util::NodeKind;
 use wotw_seedgen::util::Position as SeedgenPosition;
@@ -45,7 +45,7 @@ impl Graph {
 /// @throws {string} Throws if the input fails to parse
 pub fn graph(areas: &str, locations: &str) -> Result<Graph, JsValue> {
     let states = "";  // As long as the state data doesn't track coordinates, it isn't useful for our purpose
-    let mut settings = GameSettings::default();
+    let mut settings = UniverseSettings::default();
     settings.world_settings[0].difficulty = Difficulty::Unsafe;  // Ensure no paths are optimized away
     let logic = wotw_seedgen::logic::parse_logic(areas, locations, states, &settings, false)?;
 

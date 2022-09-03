@@ -1,8 +1,8 @@
 
 use wasm_bindgen::prelude::*;
 
-use wotw_seedgen::settings::GameSettings as SeedgenGameSettings;
-use wotw_seedgen::preset::GamePreset as SeedgenGamePreset;
+use wotw_seedgen::settings::UniverseSettings as SeedgenUniverseSettings;
+use wotw_seedgen::preset::UniversePreset as SeedgenUniversePreset;
 use wotw_seedgen::settings::WorldSettings as SeedgenWorldSettings;
 use wotw_seedgen::preset::WorldPreset as SeedgenWorldPreset;
 
@@ -12,21 +12,21 @@ use crate::files::JsFileAccess;
 /// 
 /// Using the same settings will result in generating the same seed (unless the used header files change)
 #[wasm_bindgen]
-pub struct GameSettings(SeedgenGameSettings);
+pub struct UniverseSettings(SeedgenUniverseSettings);
 #[wasm_bindgen]
-impl GameSettings {
-    /// Returns the default `GameSettings`
+impl UniverseSettings {
+    /// Returns the default `UniverseSettings`
     /// 
     /// When using this function, the string used to seed the rng will be randomly generated
-    pub fn default() -> Self { Self(SeedgenGameSettings::default()) }
+    pub fn default() -> Self { Self(SeedgenUniverseSettings::default()) }
 
-    /// Parse the `GameSettings` from json
+    /// Parse the `UniverseSettings` from json
     /// 
     /// @throws {string} if the input fails to deserialize
     #[wasm_bindgen(js_name = "fromJson")]
-    pub fn from_json(json: &str) -> Result<GameSettings, String> {
-        SeedgenGameSettings::parse(json)
-            .map(GameSettings)
+    pub fn from_json(json: &str) -> Result<UniverseSettings, String> {
+        SeedgenUniverseSettings::parse(json)
+            .map(UniverseSettings)
             .map_err(|err| err.to_string())
     }
     /// Serialize the `Settings` into json
@@ -35,7 +35,7 @@ impl GameSettings {
         self.0.to_json()
     }
 
-    /// Apply a `GamePreset`
+    /// Apply a `UniversePreset`
     /// 
     /// This follows various rules to retain all unrelated parts of the existing Settings:
     /// - Any `undefined` values of the preset will be ignored
@@ -49,7 +49,7 @@ impl GameSettings {
     /// 
     /// @throws {string} if included presets cannot be found using the provided `fileaccess` or the world counts are incompatible
     #[wasm_bindgen(js_name = "applyPreset")]
-    pub fn apply_preset(&mut self, preset: GamePreset, file_access: &JsFileAccess) -> Result<(), String> {
+    pub fn apply_preset(&mut self, preset: UniversePreset, file_access: &JsFileAccess) -> Result<(), String> {
         self.0.apply_preset(preset.0, file_access).map_err(|err| err.to_string())
     }
 }
@@ -96,21 +96,21 @@ impl WorldSettings {
 
 /// A collection of settings that can be applied to existing settings
 /// 
-/// Use `GameSettings.apply_preset` to apply a `GamePreset` to existing `GameSettings`
+/// Use `UniverseSettings.apply_preset` to apply a `UniversePreset` to existing `UniverseSettings`
 #[wasm_bindgen]
-pub struct GamePreset(SeedgenGamePreset);
+pub struct UniversePreset(SeedgenUniversePreset);
 #[wasm_bindgen]
-impl GamePreset {
-    /// Parse a `GamePreset` from json
+impl UniversePreset {
+    /// Parse a `UniversePreset` from json
     /// 
     /// @throws {string} if the input fails to deserialize
     #[wasm_bindgen(js_name = "fromJson")]
-    pub fn from_json(json: &str) -> Result<GamePreset, String> {
-        SeedgenGamePreset::parse(json)
-            .map(GamePreset)
+    pub fn from_json(json: &str) -> Result<UniversePreset, String> {
+        SeedgenUniversePreset::parse(json)
+            .map(UniversePreset)
             .map_err(|err| err.to_string())
     }
-    /// Serialize the `GamePreset` into json
+    /// Serialize the `UniversePreset` into json
     #[wasm_bindgen(js_name = "toJson")]
     pub fn to_json(&self) -> String {
         self.0.to_json()

@@ -6,13 +6,13 @@ use wotw_seedgen::files::FileAccess;
 /// Interface to serve files as needed
 #[wasm_bindgen]
 pub struct JsFileAccess {
-    game_preset_callback: Function,
+    universe_preset_callback: Function,
     world_preset_callback: Function,
     header_callback: Function,
 }
 impl FileAccess for JsFileAccess {
-    fn read_game_preset(&self, identifier: &str) -> Result<String, String> {
-        js_call(&self.game_preset_callback, identifier)
+    fn read_universe_preset(&self, identifier: &str) -> Result<String, String> {
+        js_call(&self.universe_preset_callback, identifier)
     }
     fn read_world_preset(&self, identifier: &str) -> Result<String, String> {
         js_call(&self.world_preset_callback, identifier)
@@ -36,10 +36,10 @@ impl JsFileAccess {
     /// This type will have to be passed when working with presets or headers since they may include further files
     #[wasm_bindgen(constructor)]
     pub fn new(
-        game_preset_callback: Function,
+        universe_preset_callback: Function,
         world_preset_callback: Function,
         header_callback: Function,
     ) -> Self {
-        Self { game_preset_callback, world_preset_callback, header_callback }
+        Self { universe_preset_callback, world_preset_callback, header_callback }
     }
 }
