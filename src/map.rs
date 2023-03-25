@@ -1,3 +1,4 @@
+use regex::Regex;
 use wasm_bindgen::prelude::*;
 
 use wotw_seedgen::settings::{Difficulty, UniverseSettings};
@@ -157,6 +158,17 @@ pub struct Node {
     /// The map position of this `Node`, using in-game coordinates
     pub position: Vector2,
 }
+#[wasm_bindgen]
+impl Node {
+    #[wasm_bindgen]
+    /// The location of this `Node` definition in the source file
+    pub fn source_location(&self, areas: &str) -> Option<SourceLocation> {
+        Regex::new(&format!("^anchor +{}", self.name))
+            .unwrap()
+            .find(areas)
+            .map(|matched| SourceLocation::from_index(areas, matched.start()))
+    }
+}
 
 wrapper_list! {
     #[wasm_bindgen]
@@ -186,6 +198,54 @@ impl Connection {
     /// The `ConnectionType` of this `Connection`
     pub fn kind(&self) -> ConnectionTypeEnum {
         self.kind.into_js_enum()
+    }
+    #[wasm_bindgen]
+    /// The location of this `Connection` definition in the source file
+    ///
+    /// If this `Connection` is not `unidirectional`, setting `inverse` to `false` will return the definition from `start` to `end`,
+    /// while setting `inverse` to `true` will return the definition from `end` to `start`
+    pub fn source_location(&self, areas: &str, inverse: bool) -> Option<SourceLocation> {
+        let (from, to) = if inverse {
+            (&self.end, &self.start)
+        } else {
+            (&self.start, &self.end)
+        };
+
+        let connection_pattern = match self.kind {
+            ConnectionType::Branch => format!("^ +conn +{to}"),
+            ConnectionType::Leaf => format!("^ +(?:pickup|quest) +{to}"),
+        };
+
+        let index = Regex::new(&connection_pattern)
+            .unwrap()
+            .find_iter(areas)
+            .find_map(|matched| {
+                let anchor = areas[..matched.start()].rfind("\nanchor")?;
+                if areas[anchor + 7..]
+                    .trim_start_matches(' ')
+                    .starts_with(from)
+                {
+                    Some(matched.start())
+                } else {
+                    None
+                }
+            })?;
+
+        Some(SourceLocation::from_index(areas, index))
+    }
+}
+#[wasm_bindgen]
+/// line and character location inside a text file
+pub struct SourceLocation {
+    pub line: usize,
+    pub char: usize,
+}
+impl SourceLocation {
+    fn from_index(source: &str, index: usize) -> Self {
+        let line = source[..index].bytes().filter(|b| *b == b'\n').count();
+        let char = source[index..].find(|c| c != ' ').unwrap_or(0);
+
+        Self { line, char }
     }
 }
 
