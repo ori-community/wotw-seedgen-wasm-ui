@@ -1,9 +1,9 @@
 use wasm_bindgen::prelude::*;
 
-use wotw_seedgen::settings::{UniverseSettings, Difficulty};
-use wotw_seedgen::world::graph::Node as SeedgenNode;
+use wotw_seedgen::settings::{Difficulty, UniverseSettings};
 use wotw_seedgen::util::NodeKind;
 use wotw_seedgen::util::Position as SeedgenPosition;
+use wotw_seedgen::world::graph::Node as SeedgenNode;
 
 use wasm_bindgen_helper_macros::*;
 
@@ -39,17 +39,19 @@ impl Graph {
 
 #[wasm_bindgen]
 /// Returns a `Graph` based on the given logic files
-/// 
+///
 /// `areas` should be in the syntax usually used by `areas.wotw`, `locations` should provide csv data as usually used by `loc_data.csv`
-/// 
+///
 /// @throws {string} Throws if the input fails to parse
 pub fn graph(areas: &str, locations: &str) -> Result<Graph, JsValue> {
-    let states = "";  // As long as the state data doesn't track coordinates, it isn't useful for our purpose
+    let states = ""; // As long as the state data doesn't track coordinates, it isn't useful for our purpose
     let mut settings = UniverseSettings::default();
-    settings.world_settings[0].difficulty = Difficulty::Unsafe;  // Ensure no paths are optimized away
+    settings.world_settings[0].difficulty = Difficulty::Unsafe; // Ensure no paths are optimized away
     let logic = wotw_seedgen::logic::parse_logic(areas, locations, states, &settings, false)?;
 
-    let positioned_nodes = logic.nodes.iter()
+    let positioned_nodes = logic
+        .nodes
+        .iter()
         .filter_map(|node| node.map_position().map(|position| (node, position)))
         .collect::<Vec<_>>();
 
@@ -59,7 +61,8 @@ pub fn graph(areas: &str, locations: &str) -> Result<Graph, JsValue> {
     Ok(Graph { nodes, connections })
 }
 fn nodes(positioned_nodes: &[(&SeedgenNode, &SeedgenPosition)]) -> __NodeList {
-    let nodes = positioned_nodes.iter()
+    let nodes = positioned_nodes
+        .iter()
         .map(|(node, position)| {
             let name = node.identifier().to_owned();
             let position = Vector2::from((*position).clone());
@@ -68,35 +71,57 @@ fn nodes(positioned_nodes: &[(&SeedgenNode, &SeedgenPosition)]) -> __NodeList {
         .collect::<Vec<_>>();
     __NodeList::from(nodes)
 }
-fn connections(nodes: &[SeedgenNode], positioned_nodes: &[(&SeedgenNode, &SeedgenPosition)]) -> __ConnectionList {
-    let mut node_pairs = positioned_nodes.iter()
-        .filter_map(|(node, _)| if let SeedgenNode::Anchor(anchor) = node { Some(anchor) } else { None })  // Anchors
-        .flat_map(|anchor|
-            anchor.connections.iter()
+fn connections(
+    nodes: &[SeedgenNode],
+    positioned_nodes: &[(&SeedgenNode, &SeedgenPosition)],
+) -> __ConnectionList {
+    let mut node_pairs = positioned_nodes
+        .iter()
+        .filter_map(|(node, _)| {
+            if let SeedgenNode::Anchor(anchor) = node {
+                Some(anchor)
+            } else {
+                None
+            }
+        }) // Anchors
+        .flat_map(|anchor| {
+            anchor
+                .connections
+                .iter()
                 .map(|connection| &nodes[connection.to]) // Target nodes
-                .filter(|node| node.position().is_some())  // Only positioned targets
-                .map(|target| (anchor, target))  // Pairs of anchors and target nodes
-                .collect::<Vec<_>>())
+                .filter(|node| node.position().is_some()) // Only positioned targets
+                .map(|target| (anchor, target)) // Pairs of anchors and target nodes
+                .collect::<Vec<_>>()
+        })
         .collect::<Vec<_>>();
 
     let mut connections = Vec::with_capacity(node_pairs.len());
     while let Some((start, end)) = node_pairs.pop() {
-        let unidirectional = match node_pairs.iter().enumerate()
-            .find(|(_, (other_start, other_end))| start.index == other_end.index() && end.index() == other_start.index)
-        {
-            Some((reverse_connection_index, _)) => {
-                node_pairs.remove(reverse_connection_index);
-                false
-            },
-            None => true,
-        };
+        let unidirectional =
+            match node_pairs
+                .iter()
+                .enumerate()
+                .find(|(_, (other_start, other_end))| {
+                    start.index == other_end.index() && end.index() == other_start.index
+                }) {
+                Some((reverse_connection_index, _)) => {
+                    node_pairs.remove(reverse_connection_index);
+                    false
+                }
+                None => true,
+            };
         let kind = match end.node_kind() {
             NodeKind::Anchor => ConnectionType::Branch,
             _ => ConnectionType::Leaf,
         };
         let start = start.identifier.clone();
         let end = end.identifier().to_owned();
-        let connection = Connection { start, end, unidirectional, kind };
+        let connection = Connection {
+            start,
+            end,
+            unidirectional,
+            kind,
+        };
         connections.push(connection);
     }
 

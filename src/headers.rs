@@ -1,10 +1,10 @@
 use wasm_bindgen::prelude::*;
 
+use wotw_seedgen::header::Annotation as SeedgenAnnotation;
 use wotw_seedgen::header::Header;
 use wotw_seedgen::header::HeaderDocumentation as SeedgenHeaderDocumentation;
-use wotw_seedgen::header::ParameterInfo as SeedgenParameterInfo;
 use wotw_seedgen::header::ParameterDefault as SeedgenParameterDefault;
-use wotw_seedgen::header::Annotation as SeedgenAnnotation;
+use wotw_seedgen::header::ParameterInfo as SeedgenParameterInfo;
 
 use wasm_bindgen_helper_macros::*;
 
@@ -32,7 +32,7 @@ impl From<Vec<SeedgenAnnotation>> for Annotations {
 }
 
 /// Returns the annotations of a given header syntax
-/// 
+///
 /// This will only parse the minimum amount required to know the annotations
 #[wasm_bindgen]
 pub fn parse_annotations(header: &str) -> Result<Annotations, String> {
@@ -42,12 +42,12 @@ pub fn parse_annotations(header: &str) -> Result<Annotations, String> {
 #[wasm_bindgen]
 pub struct HeaderDocumentation {
     /// Brief name, this may never exceed one line
-    /// 
+    ///
     /// `undefined` if not provided by the header
     #[wasm_bindgen(getter_with_clone)]
     pub name: Option<String>,
     /// Extended description
-    /// 
+    ///
     /// `undefined` if not provided by the header
     #[wasm_bindgen(getter_with_clone)]
     pub description: Option<String>,
@@ -61,7 +61,7 @@ impl From<SeedgenHeaderDocumentation> for HeaderDocumentation {
 }
 
 /// Returns the name and description of a given header syntax
-/// 
+///
 /// This will only parse the minimum amount required to know the documentation
 #[wasm_bindgen]
 pub fn parse_documentation(header: &str) -> HeaderDocumentation {
@@ -87,10 +87,19 @@ pub struct Parameter {
 
 impl From<SeedgenParameterInfo> for Parameter {
     fn from(parameter_info: SeedgenParameterInfo) -> Self {
-        let SeedgenParameterInfo { identifier, default, documentation } = parameter_info;
+        let SeedgenParameterInfo {
+            identifier,
+            default,
+            documentation,
+        } = parameter_info;
         let default_value = default.to_string();
         let parameter_type = default.into();
-        Self { identifier, parameter_type, default_value, documentation }
+        Self {
+            identifier,
+            parameter_type,
+            default_value,
+            documentation,
+        }
     }
 }
 
@@ -115,7 +124,7 @@ impl From<SeedgenParameterDefault> for ParameterType {
 }
 
 /// Returns the parameters present in the header, including their names and default values
-/// 
+///
 /// This will parse any parameter lines to read their relevant values, but skip parsing anything else
 #[wasm_bindgen]
 pub fn parse_parameters(header: &str) -> ParameterArray {
