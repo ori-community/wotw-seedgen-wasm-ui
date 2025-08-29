@@ -24,6 +24,7 @@ wasm-pack = "0.13.1"
 # Tell `rustc` to optimize for small code size.
 opt-level = "s"
 debug = true
+strip = true
 
 [[bin]]
 name = "write-pkg"
