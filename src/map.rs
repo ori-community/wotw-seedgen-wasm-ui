@@ -89,6 +89,7 @@ fn connections(
             anchor
                 .connections
                 .iter()
+                .filter(|connection| !connection.implicitly_generated)
                 .map(|connection| &nodes[connection.to]) // Target nodes
                 .filter(|node| node.position().is_some()) // Only positioned targets
                 .map(|target| (anchor, target)) // Pairs of anchors and target nodes
